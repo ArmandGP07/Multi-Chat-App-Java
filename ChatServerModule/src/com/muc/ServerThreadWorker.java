@@ -1,7 +1,6 @@
 package com.muc;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Date;
 
@@ -28,12 +27,25 @@ public class ServerThreadWorker extends Thread{
 
     // Method for handling client socket //
     private void handleClientSocket() throws IOException, InterruptedException {
-        OutputStream outputStream = clientSocket.getOutputStream();
-        for (int i=0; i<10; i++) {
-            outputStream.write(("Time now is" + new Date() + "\n").getBytes());
-            Thread.sleep(1000);
 
+        // Input stream for sending client data //
+        InputStream inputStream = clientSocket.getInputStream();
+
+        // Output stream for reading client data //
+        clientSocket.getOutputStream();
+        OutputStream outputStream = clientSocket.getOutputStream();
+
+        // Buffer reader //
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if ("quit".equalsIgnoreCase(line)) {
+                break;
+            }
+            String message = "You tipped: " + line + "\n";
+            outputStream.write(message.getBytes());
         }
+
         clientSocket.close();
     }
 }
