@@ -4,14 +4,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 // Server class for handling the thread for multiple connections //
 public class ServerThreadWorker extends Thread{
 
     private final Socket clientSocket;
+    private final ServerConnections serverConnections;
     private String login = null;
+    private OutputStream outputStream;
 
-    public ServerThreadWorker(Socket clientSocket) {
+    public ServerThreadWorker(ServerConnections serverConnections, Socket clientSocket) {
+        this.serverConnections = serverConnections;
         this.clientSocket = clientSocket;
     }
 
@@ -35,7 +39,7 @@ public class ServerThreadWorker extends Thread{
 
         // Output stream for reading client data //
         clientSocket.getOutputStream();
-        OutputStream outputStream = clientSocket.getOutputStream();
+        this.outputStream = clientSocket.getOutputStream();
 
         // Buffer reader //
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -69,6 +73,11 @@ public class ServerThreadWorker extends Thread{
         clientSocket.close();
     }
 
+    // Expose login to Server Thread Workers //
+    public String getLogin() {
+        return login;
+    }
+
     // Handle Login method //
     private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException {
         if (tokens.length == 3) {
@@ -77,10 +86,31 @@ public class ServerThreadWorker extends Thread{
 
            // Login accepted //
             if ((login.equals("guest") && password.equals("guest")) || (login.equals("armando") && password.equals("armando"))) {
-                String message = "login ok\n";
+                String message = "login successful\n";
                 outputStream.write(message.getBytes());
                 this.login = login;
                 System.out.println("User logged in successfully: " + login);
+
+
+                List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+
+                // Send current user all other online logins //
+                for (ServerThreadWorker threadWorker : threadWorkerList) {
+                    if (threadWorker.getLogin() != null) {
+                        if (!login.equals(threadWorker.getLogin())) {
+                            String onlineMessage2 = "online " + threadWorker.getLogin() + "\n";
+                            send(onlineMessage2);
+                        }
+                    }
+                }
+
+                // Send other online users current user's status //
+                String onlineMessage = "online " + login + "\n";
+                for (ServerThreadWorker threadWorker : threadWorkerList) {
+                    if (!login.equals(threadWorker.getLogin())) {
+                        threadWorker.send(onlineMessage);
+                    }
+                }
 
                 // Login denied //
             } else {
@@ -88,6 +118,14 @@ public class ServerThreadWorker extends Thread{
                 outputStream.write(message.getBytes());
             }
 
+        }
+    }
+
+    // Send user online method //
+    private void send(String onlineMessage) throws IOException {
+
+        if (login != null) {
+            outputStream.write(onlineMessage.getBytes());
         }
     }
 }
