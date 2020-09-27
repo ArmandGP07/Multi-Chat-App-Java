@@ -23,38 +23,16 @@ public class MainServer {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Accepted connection from " + clientSocket);
 
-                // Thread for having multiple connections //
-                Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            handleClientSocket(clientSocket);
-
-                        // Exceptions for thread //
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-                t.start();
+                // Thread worker instance for handling communication in the socket //
+                ServerThreadWorker threadWorker = new ServerThreadWorker(clientSocket);
+                threadWorker.start();
             }
-            
+
         // Exception handling //
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Method for handling client socket //
-    private static void handleClientSocket(Socket clientSocket) throws IOException, InterruptedException {
-        OutputStream outputStream = clientSocket.getOutputStream();
-        for (int i=0; i<10; i++) {
-            outputStream.write(("Time now is" + new Date() + "\n").getBytes());
-            Thread.sleep(1000);
 
-        }
-        clientSocket.close();
-    }
 }
