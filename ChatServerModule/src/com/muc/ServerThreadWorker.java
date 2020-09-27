@@ -1,8 +1,9 @@
 package com.muc;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.*;
 import java.net.Socket;
-import java.util.Date;
 
 // Server class for handling the thread for multiple connections //
 public class ServerThreadWorker extends Thread{
@@ -39,11 +40,24 @@ public class ServerThreadWorker extends Thread{
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = reader.readLine()) != null) {
-            if ("quit".equalsIgnoreCase(line)) {
-                break;
+
+            // Split line in individual tokens //
+            String[] tokens = StringUtils.split(line);
+
+            // if method for not causing null pointer exceptions //
+            if (tokens != null && tokens.length > 0) {
+
+                // First token //
+                String cmd = tokens[0];
+                if ("quit".equalsIgnoreCase(cmd)) {
+                    break;
+                } else {
+
+                    // Unknown string for not identifying command //
+                   String msg = "unknown " + cmd + "\n";
+                   outputStream.write(msg.getBytes());
+                }
             }
-            String message = "You tipped: " + line + "\n";
-            outputStream.write(message.getBytes());
         }
 
         clientSocket.close();
