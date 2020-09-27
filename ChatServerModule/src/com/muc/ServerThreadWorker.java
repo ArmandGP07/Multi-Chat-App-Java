@@ -9,6 +9,7 @@ import java.net.Socket;
 public class ServerThreadWorker extends Thread{
 
     private final Socket clientSocket;
+    private String login = null;
 
     public ServerThreadWorker(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -51,6 +52,11 @@ public class ServerThreadWorker extends Thread{
                 String cmd = tokens[0];
                 if ("quit".equalsIgnoreCase(cmd)) {
                     break;
+
+                // Login protocol //
+                } else if ("login".equalsIgnoreCase(cmd)){
+                    handleLogin(outputStream, tokens);
+
                 } else {
 
                     // Unknown string for not identifying command //
@@ -61,5 +67,27 @@ public class ServerThreadWorker extends Thread{
         }
 
         clientSocket.close();
+    }
+
+    // Handle Login method //
+    private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException {
+        if (tokens.length == 3) {
+           String login = tokens[1];
+           String password = tokens[2];
+
+           // Login accepted //
+            if ((login.equals("guest") && password.equals("guest")) || (login.equals("armando") && password.equals("armando"))) {
+                String message = "login ok\n";
+                outputStream.write(message.getBytes());
+                this.login = login;
+                System.out.println("User logged in successfully: " + login);
+
+                // Login denied //
+            } else {
+                String message = "login error\n";
+                outputStream.write(message.getBytes());
+            }
+
+        }
     }
 }
