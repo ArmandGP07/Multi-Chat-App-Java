@@ -55,14 +55,18 @@ public class ServerThreadWorker extends Thread{
                 // First token //
                 String cmd = tokens[0];
 
-                // Logoff protocol //
+                // Logoff command //
                 if ("logoff".equalsIgnoreCase(cmd) || "quit".equalsIgnoreCase(cmd)) {
                     handleLogoff();
                     break;
 
-                // Login protocol //
-                } else if ("login".equalsIgnoreCase(cmd)){
+                // Login command //
+                } else if ("login".equalsIgnoreCase(cmd)) {
                     handleLogin(outputStream, tokens);
+
+                } else if ("msg".equalsIgnoreCase(cmd)) {
+                    String[] tokensMsg = StringUtils.split(line, null, 3);
+                    handleMessage(tokensMsg);
 
                 } else {
 
@@ -76,9 +80,30 @@ public class ServerThreadWorker extends Thread{
         clientSocket.close();
     }
 
+    // Method for handling message command //
+    private void handleMessage(String[] tokens) throws IOException {
+        String sendMsgTo = tokens[1];
+        String msgBody = tokens[2];
+
+        // Iterating through list of server thread worker //
+        List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+
+        // Sending messages ability //
+        for (ServerThreadWorker threadWorker : threadWorkerList) {
+            if (sendMsgTo.equalsIgnoreCase(threadWorker.getLogin())) {
+
+                // Message structure //
+                String outMsg = "msg " + login + " "+ msgBody + "\n";
+                threadWorker.send(outMsg);
+            }
+        }
+    }
+
     // Logoff method //
     private void handleLogoff() throws IOException {
         serverConnections.removeThreadWorker(this);
+
+        // Iterating through list of server thread worker //
         List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
 
         // Send other online users current user's status (offline) //
@@ -109,7 +134,7 @@ public class ServerThreadWorker extends Thread{
                 this.login = login;
                 System.out.println("User logged in successfully: " + login);
 
-
+                // Iterating through list of server thread worker //
                 List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
 
                 // Send current user all other online logins //

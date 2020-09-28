@@ -18,3 +18,7 @@ COMMANDS:
 
     login <user> <password>
     logoff
+
+    message || msg <user> body....
+    i.e.: guest: "msg armando Hello world"  <-- sent
+          armando: "msg guest Hello world"  <-- received
