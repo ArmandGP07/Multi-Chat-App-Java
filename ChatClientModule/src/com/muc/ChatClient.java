@@ -65,13 +65,13 @@ public class ChatClient {
         }
     }
 
-    private void msg(String sendMsgTo, String msgBody) throws IOException {
+    public void msg(String sendMsgTo, String msgBody) throws IOException {
         String cmd = "msg " + sendMsgTo + " " + msgBody + "\n";
         serverOut.write(cmd.getBytes());
     }
 
     // API login Method //
-    private boolean login(String login, String password) throws IOException {
+    public boolean login(String login, String password) throws IOException {
         String cmd = "login " + login + " " + password + "\n";
         serverOut.write(cmd.getBytes());
 
@@ -158,7 +158,7 @@ public class ChatClient {
     }
 
     // Connect method for connecting to the server using a socket //
-    private boolean connect() {
+    public boolean connect() {
         try {
             this.socket = new Socket(serverName, serverPort);
             System.out.println("Client port is " + socket.getLocalPort());
