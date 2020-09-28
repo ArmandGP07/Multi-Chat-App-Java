@@ -12,7 +12,7 @@ User & Server interactions (commands)
 3. User --> User
 
     * direct messages
-    * broadcast messages
+    * broadcast messages / group messaging
 
 COMMANDS:
 
@@ -22,3 +22,9 @@ COMMANDS:
     message || msg <user> body....
     i.e.: guest: "msg armando Hello world"  <-- sent
           armando: "msg guest Hello world"  <-- received
+
+    #topic <-- chatroom / group chat
+    join #topic
+    leave #topic
+    sent: msg #topic body...
+    received: msg #topic: <login> body...

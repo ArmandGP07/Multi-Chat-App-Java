@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.List;
 
 // Server class for handling the thread for multiple connections //
@@ -13,6 +14,7 @@ public class ServerThreadWorker extends Thread{
     private final ServerConnections serverConnections;
     private String login = null;
     private OutputStream outputStream;
+    private HashSet<String> topicSet = new HashSet<>();
 
     public ServerThreadWorker(ServerConnections serverConnections, Socket clientSocket) {
         this.serverConnections = serverConnections;
@@ -64,9 +66,18 @@ public class ServerThreadWorker extends Thread{
                 } else if ("login".equalsIgnoreCase(cmd)) {
                     handleLogin(outputStream, tokens);
 
+                // Message command //
                 } else if ("msg".equalsIgnoreCase(cmd)) {
                     String[] tokensMsg = StringUtils.split(line, null, 3);
                     handleMessage(tokensMsg);
+
+                // Join topic/group chat command //
+                } else if ("join".equalsIgnoreCase(cmd)) {
+                    handleJoin(tokens);
+
+                // Leave topic/group chat command //
+                } else if ("leave".equalsIgnoreCase(cmd)){
+                    handleLeave(tokens);
 
                 } else {
 
@@ -80,21 +91,53 @@ public class ServerThreadWorker extends Thread{
         clientSocket.close();
     }
 
+    // Method for leaving topic/group chat //
+    private void handleLeave(String[] tokens) {
+        if (tokens.length > 1) {
+            String topic = tokens[1];
+            topicSet.remove(topic);
+        }
+    }
+
+    // Boolean for testing if user is member of topic/group chat //
+    public boolean memberOfTopic (String topic) {
+        return topicSet.contains(topic);
+    }
+
+    // Method for handling Join group chat/topic //
+    private void handleJoin(String[] tokens) {
+        if (tokens.length > 1) {
+            String topic = tokens[1];
+            topicSet.add(topic);
+        }
+    }
+
     // Method for handling message command //
     private void handleMessage(String[] tokens) throws IOException {
         String sendMsgTo = tokens[1];
         String msgBody = tokens[2];
+
+        boolean isTopic = (sendMsgTo.charAt(0) == '#');
 
         // Iterating through list of server thread worker //
         List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
 
         // Sending messages ability //
         for (ServerThreadWorker threadWorker : threadWorkerList) {
-            if (sendMsgTo.equalsIgnoreCase(threadWorker.getLogin())) {
+            if (isTopic) {
+                if (threadWorker.memberOfTopic(sendMsgTo)) {
 
-                // Message structure //
-                String outMsg = "msg " + login + " "+ msgBody + "\n";
-                threadWorker.send(outMsg);
+                    // Group chat/topic format //
+                    String outMsg = "msg " + sendMsgTo + ": " + login + " " + msgBody + "\n";
+                    threadWorker.send(outMsg);
+                }
+            }else {
+                if (sendMsgTo.equalsIgnoreCase(threadWorker.getLogin())) {
+
+                    // One-to-one message format //
+                    String outMsg = "msg " + login + " " + msgBody + "\n";
+                    threadWorker.send(outMsg);
+                }
             }
         }
     }
