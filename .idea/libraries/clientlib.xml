@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="clientlib">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/ChatClientModule/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/ChatClientModule/lib" recursive="false" />
+  </library>
+</component>

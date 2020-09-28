@@ -6,20 +6,20 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-// Server connections  class thread //
-public class ServerConnections extends Thread{
+// Server class thread //
+public class Server extends Thread {
     private final int serverPort;
 
     // List of Server Thread workers //
-    private ArrayList <ServerThreadWorker> threadWorkerList = new ArrayList<>();
+    private ArrayList<ServerWorker> workerList = new ArrayList<>();
 
-    public ServerConnections(int serverPort) {
+    public Server(int serverPort) {
         this.serverPort = serverPort;
     }
 
     // Server Thread worker for accessing other Server Thread Workers //
-    public List<ServerThreadWorker> getThreadWorkerList() {
-        return threadWorkerList;
+    public List<ServerWorker> getWorkerList() {
+        return workerList;
     }
 
     @Override
@@ -36,22 +36,21 @@ public class ServerConnections extends Thread{
                 System.out.println("Accepted connection from " + clientSocket);
 
                 // Thread worker instance for handling communication in the socket //
-                ServerThreadWorker threadWorker = new ServerThreadWorker(this, clientSocket);
+                ServerWorker worker = new ServerWorker(this, clientSocket);
 
                 // Adding worker list //
-                threadWorkerList.add(threadWorker);
-
-                threadWorker.start();
+                workerList.add(worker);
+                worker.start();
             }
 
-            // Exception handling //
+        // Exception handling //
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     // Logoff exceptions //
-    public void removeThreadWorker(ServerThreadWorker serverThreadWorker) {
-        threadWorkerList.remove(serverThreadWorker);
+    public void removeWorker(ServerWorker serverWorker) {
+        workerList.remove(serverWorker);
     }
 }

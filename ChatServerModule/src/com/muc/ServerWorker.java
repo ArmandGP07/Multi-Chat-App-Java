@@ -1,23 +1,25 @@
 package com.muc;
 
+import ch.qos.logback.classic.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 // Server class for handling the thread for multiple connections //
-public class ServerThreadWorker extends Thread{
+public class ServerWorker extends Thread {
 
     private final Socket clientSocket;
-    private final ServerConnections serverConnections;
+    private final Server server;
     private String login = null;
     private OutputStream outputStream;
     private HashSet<String> topicSet = new HashSet<>();
 
-    public ServerThreadWorker(ServerConnections serverConnections, Socket clientSocket) {
-        this.serverConnections = serverConnections;
+    public ServerWorker(Server server, Socket clientSocket) {
+        this.server = server;
         this.clientSocket = clientSocket;
     }
 
@@ -40,13 +42,12 @@ public class ServerThreadWorker extends Thread{
         InputStream inputStream = clientSocket.getInputStream();
 
         // Output stream for reading client data //
-        clientSocket.getOutputStream();
         this.outputStream = clientSocket.getOutputStream();
 
         // Buffer reader //
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
-        while ((line = reader.readLine()) != null) {
+        while ( (line = reader.readLine()) != null) {
 
             // Split line in individual tokens //
             String[] tokens = StringUtils.split(line);
@@ -58,7 +59,7 @@ public class ServerThreadWorker extends Thread{
                 String cmd = tokens[0];
 
                 // Logoff command //
-                if ("logoff".equalsIgnoreCase(cmd) || "quit".equalsIgnoreCase(cmd)) {
+                if ("logoff".equals(cmd) || "quit".equalsIgnoreCase(cmd)) {
                     handleLogoff();
                     break;
 
@@ -76,14 +77,14 @@ public class ServerThreadWorker extends Thread{
                     handleJoin(tokens);
 
                 // Leave topic/group chat command //
-                } else if ("leave".equalsIgnoreCase(cmd)){
+                } else if ("leave".equalsIgnoreCase(cmd)) {
                     handleLeave(tokens);
 
                 } else {
 
                     // Unknown string for not identifying command //
-                   String msg = "unknown " + cmd + "\n";
-                   outputStream.write(msg.getBytes());
+                    String msg = "unknown " + cmd + "\n";
+                    outputStream.write(msg.getBytes());
                 }
             }
         }
@@ -100,7 +101,7 @@ public class ServerThreadWorker extends Thread{
     }
 
     // Boolean for testing if user is member of topic/group chat //
-    public boolean memberOfTopic (String topic) {
+    public boolean isMemberOfTopic(String topic) {
         return topicSet.contains(topic);
     }
 
@@ -112,31 +113,32 @@ public class ServerThreadWorker extends Thread{
         }
     }
 
+
     // Method for handling message command //
     private void handleMessage(String[] tokens) throws IOException {
-        String sendMsgTo = tokens[1];
-        String msgBody = tokens[2];
+        String sendTo = tokens[1];
+        String body = tokens[2];
 
-        boolean isTopic = (sendMsgTo.charAt(0) == '#');
+        boolean isTopic = sendTo.charAt(0) == '#';
 
         // Iterating through list of server thread worker //
-        List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+        List<ServerWorker> workerList = server.getWorkerList();
 
         // Sending messages ability //
-        for (ServerThreadWorker threadWorker : threadWorkerList) {
+        for(ServerWorker worker : workerList) {
             if (isTopic) {
-                if (threadWorker.memberOfTopic(sendMsgTo)) {
+                if (worker.isMemberOfTopic(sendTo)) {
 
                     // Group chat/topic format //
-                    String outMsg = "msg " + sendMsgTo + ": " + login + " " + msgBody + "\n";
-                    threadWorker.send(outMsg);
+                    String outMsg = "msg " + sendTo + ":" + login + " " + body + "\n";
+                    worker.send(outMsg);
                 }
-            }else {
-                if (sendMsgTo.equalsIgnoreCase(threadWorker.getLogin())) {
+            } else {
+                if (sendTo.equalsIgnoreCase(worker.getLogin())) {
 
                     // One-to-one message format //
-                    String outMsg = "msg " + login + " " + msgBody + "\n";
-                    threadWorker.send(outMsg);
+                    String outMsg = "msg " + login + " " + body + "\n";
+                    worker.send(outMsg);
                 }
             }
         }
@@ -144,16 +146,16 @@ public class ServerThreadWorker extends Thread{
 
     // Logoff method //
     private void handleLogoff() throws IOException {
-        serverConnections.removeThreadWorker(this);
+        server.removeWorker(this);
 
         // Iterating through list of server thread worker //
-        List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+        List<ServerWorker> workerList = server.getWorkerList();
 
         // Send other online users current user's status (offline) //
-        String onlineMessage = "offline " + login + "\n";
-        for (ServerThreadWorker threadWorker : threadWorkerList) {
-            if (!login.equals(threadWorker.getLogin())) {
-                threadWorker.send(onlineMessage);
+        String onlineMsg = "offline " + login + "\n";
+        for(ServerWorker worker : workerList) {
+            if (!login.equals(worker.getLogin())) {
+                worker.send(onlineMsg);
             }
         }
         clientSocket.close();
@@ -167,52 +169,50 @@ public class ServerThreadWorker extends Thread{
     // Handle Login method //
     private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException {
         if (tokens.length == 3) {
-           String login = tokens[1];
-           String password = tokens[2];
+            String login = tokens[1];
+            String password = tokens[2];
 
-           // Login accepted //
-            if ((login.equals("guest") && password.equals("guest")) || (login.equals("armando") && password.equals("armando"))) {
-                String message = "login successful\n";
-                outputStream.write(message.getBytes());
+            // Login accepted //
+            if ((login.equals("guest") && password.equals("guest")) || (login.equals("jim") && password.equals("jim")) ) {
+                String msg = "ok login\n";
+                outputStream.write(msg.getBytes());
                 this.login = login;
-                System.out.println("User logged in successfully: " + login);
+                System.out.println("User logged in succesfully: " + login);
 
                 // Iterating through list of server thread worker //
-                List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+                List<ServerWorker> workerList = server.getWorkerList();
 
                 // Send current user all other online logins //
-                for (ServerThreadWorker threadWorker : threadWorkerList) {
-                    if (threadWorker.getLogin() != null) {
-                        if (!login.equals(threadWorker.getLogin())) {
-                            String onlineMessage2 = "online " + threadWorker.getLogin() + "\n";
-                            send(onlineMessage2);
+                for(ServerWorker worker : workerList) {
+                    if (worker.getLogin() != null) {
+                        if (!login.equals(worker.getLogin())) {
+                            String msg2 = "online " + worker.getLogin() + "\n";
+                            send(msg2);
                         }
                     }
                 }
 
                 // Send other online users current user's status (online) //
-                String onlineMessage = "online " + login + "\n";
-                for (ServerThreadWorker threadWorker : threadWorkerList) {
-                    if (!login.equals(threadWorker.getLogin())) {
-                        threadWorker.send(onlineMessage);
+                String onlineMsg = "online " + login + "\n";
+                for(ServerWorker worker : workerList) {
+                    if (!login.equals(worker.getLogin())) {
+                        worker.send(onlineMsg);
                     }
                 }
 
-                // Login denied //
+            // Login denied //
             } else {
-                String message = "login error\n";
-                outputStream.write(message.getBytes());
+                String msg = "error login\n";
+                outputStream.write(msg.getBytes());
                 System.err.println("Login failed for " + login);
             }
-
         }
     }
 
     // Send user online method //
-    private void send(String onlineMessage) throws IOException {
-
+    private void send(String msg) throws IOException {
         if (login != null) {
-            outputStream.write(onlineMessage.getBytes());
+            outputStream.write(msg.getBytes());
         }
     }
 }

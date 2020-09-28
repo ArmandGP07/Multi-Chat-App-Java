@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ChatClientModule/ChatClientModule.iml" filepath="$PROJECT_DIR$/ChatClientModule/ChatClientModule.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ChatServerModule/ChatServerModule.iml" filepath="$PROJECT_DIR$/ChatServerModule/ChatServerModule.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Tarea 1 algoritmos.iml" filepath="$PROJECT_DIR$/Tarea 1 algoritmos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ChatClientModule/ChatClient.iml" filepath="$PROJECT_DIR$/ChatClientModule/ChatClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ChatServerModule/ChatServer.iml" filepath="$PROJECT_DIR$/ChatServerModule/ChatServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MultiUserChat.iml" filepath="$PROJECT_DIR$/MultiUserChat.iml" />
     </modules>
   </component>
 </project>

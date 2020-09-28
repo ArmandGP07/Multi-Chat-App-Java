@@ -9,7 +9,7 @@ public class MainServer {
         int port = 8818;
 
         // Server class instance //
-        ServerConnections server = new ServerConnections(port);
+        Server server = new Server(port);
 
         server.start();
     }
