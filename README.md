@@ -7,4 +7,5 @@
 
 # User and passwords
 User1 and Password1: Clark
+
 User2 and Password2: Bruce
