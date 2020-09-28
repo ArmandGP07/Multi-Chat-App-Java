@@ -202,6 +202,7 @@ public class ServerThreadWorker extends Thread{
             } else {
                 String message = "login error\n";
                 outputStream.write(message.getBytes());
+                System.err.println("Login failed for " + login);
             }
 
         }
