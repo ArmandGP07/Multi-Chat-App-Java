@@ -54,7 +54,10 @@ public class ServerThreadWorker extends Thread{
 
                 // First token //
                 String cmd = tokens[0];
-                if ("quit".equalsIgnoreCase(cmd)) {
+
+                // Logoff protocol //
+                if ("logoff".equalsIgnoreCase(cmd) || "quit".equalsIgnoreCase(cmd)) {
+                    handleLogoff();
                     break;
 
                 // Login protocol //
@@ -70,6 +73,21 @@ public class ServerThreadWorker extends Thread{
             }
         }
 
+        clientSocket.close();
+    }
+
+    // Logoff method //
+    private void handleLogoff() throws IOException {
+
+        List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
+
+        // Send other online users current user's status (offline) //
+        String onlineMessage = "offline " + login + "\n";
+        for (ServerThreadWorker threadWorker : threadWorkerList) {
+            if (!login.equals(threadWorker.getLogin())) {
+                threadWorker.send(onlineMessage);
+            }
+        }
         clientSocket.close();
     }
 
@@ -104,7 +122,7 @@ public class ServerThreadWorker extends Thread{
                     }
                 }
 
-                // Send other online users current user's status //
+                // Send other online users current user's status (online) //
                 String onlineMessage = "online " + login + "\n";
                 for (ServerThreadWorker threadWorker : threadWorkerList) {
                     if (!login.equals(threadWorker.getLogin())) {
