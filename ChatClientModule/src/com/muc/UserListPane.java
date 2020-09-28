@@ -64,7 +64,7 @@ public class UserListPane extends JPanel implements UserStatusListener {
 
         if (client.connect()) {
             try {
-                client.login("guest", "guest");
+                client.login("Bruce", "Bruce");
             } catch (IOException e) {
                 e.printStackTrace();
             }

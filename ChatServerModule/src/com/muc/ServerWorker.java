@@ -173,11 +173,11 @@ public class ServerWorker extends Thread {
             String password = tokens[2];
 
             // Login accepted //
-            if ((login.equals("guest") && password.equals("guest")) || (login.equals("jim") && password.equals("jim")) ) {
+            if ((login.equals("Bruce") && password.equals("Bruce")) || (login.equals("Clark") && password.equals("Clark")) ) {
                 String msg = "ok login\n";
                 outputStream.write(msg.getBytes());
                 this.login = login;
-                System.out.println("User logged in succesfully: " + login);
+                System.out.println("User logged in successfully: " + login);
 
                 // Iterating through list of server thread worker //
                 List<ServerWorker> workerList = server.getWorkerList();
