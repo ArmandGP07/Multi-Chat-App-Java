@@ -49,4 +49,9 @@ public class ServerConnections extends Thread{
             e.printStackTrace();
         }
     }
+
+    // Logoff exceptions //
+    public void removeThreadWorker(ServerThreadWorker serverThreadWorker) {
+        threadWorkerList.remove(serverThreadWorker);
+    }
 }

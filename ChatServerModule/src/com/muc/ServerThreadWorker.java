@@ -78,7 +78,7 @@ public class ServerThreadWorker extends Thread{
 
     // Logoff method //
     private void handleLogoff() throws IOException {
-
+        serverConnections.removeThreadWorker(this);
         List<ServerThreadWorker> threadWorkerList = serverConnections.getThreadWorkerList();
 
         // Send other online users current user's status (offline) //
