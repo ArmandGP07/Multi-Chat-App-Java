@@ -6,19 +6,25 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 
+/**
+ * The type User list pane.
+ */
 // User list pane class //
 public class UserListPane extends JPanel implements UserStatusListener {
 
-    // Client, JList and DefaultListModel fields //
-    private final ChatClient client;
-    private JList <String> userListUI;
-    private DefaultListModel <String> userListModel;
+    private final JList <String> userListUI;
+    private final DefaultListModel <String> userListModel;
 
 
-    // User list pane's client constructor //
+    /**
+     * Instantiates a new User list pane.
+     *
+     * @param client the client
+     */
+// User list pane's client constructor //
     public UserListPane(ChatClient client) {
-        this.client = client;
-        this.client.addUserStatusListener(this);
+        // Client, JList and DefaultListModel fields //
+        client.addUserStatusListener(this);
 
         // UI //
         userListModel = new DefaultListModel<>();
@@ -45,6 +51,11 @@ public class UserListPane extends JPanel implements UserStatusListener {
         });
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ChatClient client = new ChatClient("localhost", 8818);
 

@@ -6,6 +6,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * The type Chat client.
+ */
 // Chat client class for interface with the server //
 public class ChatClient {
 
@@ -13,19 +16,30 @@ public class ChatClient {
     private final String serverName;
     private final int serverPort;
     private Socket socket;
-    private InputStream serverIn;
     private OutputStream serverOut;
     private BufferedReader bufferedIn;
 
-    private ArrayList<UserStatusListener> userStatusListeners = new ArrayList<>();
-    private ArrayList<MessageListener> messageListeners = new ArrayList<>();
+    private final ArrayList<UserStatusListener> userStatusListeners = new ArrayList<>();
+    private final ArrayList<MessageListener> messageListeners = new ArrayList<>();
 
+    /**
+     * Instantiates a new Chat client.
+     *
+     * @param serverName the server name
+     * @param serverPort the server port
+     */
     public ChatClient(String serverName, int serverPort) {
         this.serverName = serverName;
         this.serverPort = serverPort;
     }
 
-    // Client instance //
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException the io exception
+     */
+// Client instance //
     public static void main(String[] args) throws IOException {
         ChatClient client = new ChatClient("localhost", 8818);
         client.addUserStatusListener(new UserStatusListener() {
@@ -40,12 +54,7 @@ public class ChatClient {
             }
         });
 
-        client.addMessageListener(new MessageListener() {
-            @Override
-            public void onMessage(String fromLogin, String msgBody) {
-                System.out.println("You got a message from " + fromLogin + " ===>" + msgBody);
-            }
-        });
+        client.addMessageListener((fromLogin, msgBody) -> System.out.println("You got a message from " + fromLogin + " ===>" + msgBody));
 
         if (!client.connect()) {
             System.err.println("Connect failed.");
@@ -65,12 +74,27 @@ public class ChatClient {
         }
     }
 
+    /**
+     * Msg.
+     *
+     * @param sendMsgTo the send msg to
+     * @param msgBody   the msg body
+     * @throws IOException the io exception
+     */
     public void msg(String sendMsgTo, String msgBody) throws IOException {
         String cmd = "msg " + sendMsgTo + " " + msgBody + "\n";
         serverOut.write(cmd.getBytes());
     }
 
-    // API login Method //
+    /**
+     * Login boolean.
+     *
+     * @param login    the login
+     * @param password the password
+     * @return the boolean
+     * @throws IOException the io exception
+     */
+// API login Method //
     public boolean login(String login, String password) throws IOException {
         String cmd = "login " + login + " " + password + "\n";
         serverOut.write(cmd.getBytes());
@@ -86,20 +110,9 @@ public class ChatClient {
         }
     }
 
-    // Logoff method //
-    private void logoff() throws IOException {
-        String cmd = "logoff\n";
-        serverOut.write(cmd.getBytes());
-    }
-
     // Message Reader method //
     private void startMessageReader() {
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                readMessageLoop();
-            }
-        };
+        Thread t = new Thread(this::readMessageLoop);
         t.start();
     }
 
@@ -157,13 +170,18 @@ public class ChatClient {
         }
     }
 
-    // Connect method for connecting to the server using a socket //
+    /**
+     * Connect boolean.
+     *
+     * @return the boolean
+     */
+// Connect method for connecting to the server using a socket //
     public boolean connect() {
         try {
             this.socket = new Socket(serverName, serverPort);
             System.out.println("Client port is " + socket.getLocalPort());
             this.serverOut = socket.getOutputStream();
-            this.serverIn = socket.getInputStream();
+            InputStream serverIn = socket.getInputStream();
             this.bufferedIn = new BufferedReader(new InputStreamReader(serverIn));
             return true;
         } catch (IOException e) {
@@ -172,24 +190,24 @@ public class ChatClient {
         return false;
     }
 
-    // Adding user status listener method //
+    /**
+     * Add user status listener.
+     *
+     * @param listener the listener
+     */
+// Adding user status listener method //
     public void addUserStatusListener(UserStatusListener listener) {
         userStatusListeners.add(listener);
     }
 
-    // Removing user status listener method //
-    public void removeUserStatusListener(UserStatusListener listener) {
-        userStatusListeners.remove(listener);
-    }
-
-    // Adding message listener method //
+    /**
+     * Add message listener.
+     *
+     * @param listener the listener
+     */
+// Adding message listener method //
     public void addMessageListener(MessageListener listener) {
         messageListeners.add(listener);
-    }
-
-    // Removing message listener method //
-    public void removeMessageListener(MessageListener listener) {
-        messageListeners.remove(listener);
     }
 
 }

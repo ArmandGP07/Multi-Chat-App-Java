@@ -2,19 +2,32 @@ package com.muc;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
+/**
+ * The type Login window.
+ */
 // Login window class //
 public class LoginWindow extends JFrame {
 
     // Login, password, login button and client field //
     private final ChatClient client;
+    /**
+     * The Login field.
+     */
     JTextField loginField = new JTextField();
+    /**
+     * The Password field.
+     */
     JPasswordField passwordField = new JPasswordField();
+    /**
+     * The Login button.
+     */
     JButton loginButton = new JButton("Login");
 
+    /**
+     * Instantiates a new Login window.
+     */
     public LoginWindow() {
         super("Login");
 
@@ -31,12 +44,7 @@ public class LoginWindow extends JFrame {
         p.add(loginButton);
 
         // Login button action //
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                doLogin();
-            }
-        });
+        loginButton.addActionListener(e -> doLogin());
 
         getContentPane().add(p, BorderLayout.CENTER);
 
@@ -82,6 +90,11 @@ public class LoginWindow extends JFrame {
         }
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         LoginWindow loginWin = new LoginWindow();
         loginWin.setVisible(true);

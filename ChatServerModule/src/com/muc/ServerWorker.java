@@ -1,11 +1,9 @@
 package com.muc;
 
-import ch.qos.logback.classic.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -16,7 +14,7 @@ public class ServerWorker extends Thread {
     private final Server server;
     private String login = null;
     private OutputStream outputStream;
-    private HashSet<String> topicSet = new HashSet<>();
+    private final HashSet<String> topicSet = new HashSet<>();
 
     public ServerWorker(Server server, Socket clientSocket) {
         this.server = server;
@@ -30,13 +28,11 @@ public class ServerWorker extends Thread {
             handleClientSocket();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
     // Method for handling client socket //
-    private void handleClientSocket() throws IOException, InterruptedException {
+    private void handleClientSocket() throws IOException {
 
         // Input stream for sending client data //
         InputStream inputStream = clientSocket.getInputStream();
@@ -173,7 +169,7 @@ public class ServerWorker extends Thread {
             String password = tokens[2];
 
             // Login accepted //
-            if ((login.equals("Bruce") && password.equals("Bruce")) || (login.equals("Clark") && password.equals("Clark")) ) {
+            if ((login.equals("Bruce") && password.equals("Bruce")) || (login.equals("Clark") && password.equals("Clark")) || (login.equals("Pepe") && password.equals("Pepe")) ) {
                 String msg = "ok login\n";
                 outputStream.write(msg.getBytes());
                 this.login = login;

@@ -1,8 +1,16 @@
 package com.muc;
 
+/**
+ * The type Main server.
+ */
 // Main Server class //
 public class MainServer {
 
+    /**
+     * Main.
+     *
+     * @param args the args
+     */
     public static void main(String[] args){
 
         // Port used for Server Socket //

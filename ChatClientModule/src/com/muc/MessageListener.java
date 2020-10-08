@@ -1,6 +1,15 @@
 package com.muc;
 
+/**
+ * The interface Message listener.
+ */
 // Message listener interface class //
 public interface MessageListener {
-    public void onMessage (String fromLogin, String msgBody);
+    /**
+     * On message.
+     *
+     * @param fromLogin the from login
+     * @param msgBody   the msg body
+     */
+    void onMessage(String fromLogin, String msgBody);
 }
